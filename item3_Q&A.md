@@ -5,11 +5,7 @@
 ## 1. 読み取り専用引数に `const` を付ける
 
 <a id="item3-q1"></a>
-### Q1
-この関数は文字列を読むだけです。どこが嘘になっていますか？
-
-[回答へ移動](#item3-q1-answer)
-### Before
+#### Q1 この関数宣言のどの部分が、「この関数は文字列を書き換えるかもしれない」という**誤った印象**を与えていますか？
 
 ```cpp
 void printName(char* name) {
@@ -17,29 +13,19 @@ void printName(char* name) {
 }
 ```
 
-### After
 
-```cpp
-void printName(const char* name) {
-    std::cout << name << '\n';
-}
-```
-
-### ポイント
-- `char*` は「変更するかもしれない」印象になる
-- `const char*` は「読み取り専用」を型で表現する
+[回答へ移動](#item3-q1-answer)
 
 ---
 
 ## 2. ポインタの `const`（どこを守るか）
 
-### 2-1. 指す先データを守る
+#### 2-1. 指す先データを守る
 
 <a id="item3-q2-1"></a>
 ### Q2-1
-何が変更不能になりますか？
+次の修正によって何が変更不能になりますか？
 
-[回答へ移動](#item3-q2-1-answer)
 
 ### Before
 
@@ -55,15 +41,15 @@ char greeting[] = "Hello";
 const char* p = greeting;
 ```
 
+[回答へ移動](#item3-q2-1-answer)
+
 ---
 
-### 2-2. ポインタ自身を守る
+#### 2-2. ポインタ自身を守る
 
 <a id="item3-q2-2"></a>
-### Q2-2
-何が変更不能になりますか？
+#### Q2-2 次の修正によって何が変更不能になりますか？
 
-[回答へ移動](#item3-q2-2-answer)
 
 ### Before
 
@@ -79,15 +65,14 @@ char greeting[] = "Hello";
 char* const p = greeting;
 ```
 
+[回答へ移動](#item3-q2-2-answer)
+
 ---
 
-### 2-3. 両方を守る
+#### 2-3. 両方を守る
 
 <a id="item3-q2-3"></a>
-### Q2-3
-どの2つが変更不能になりますか？
-
-[回答へ移動](#item3-q2-3-answer)
+#### Q2-3 次の修正によってどの2つが変更不能になりますか？
 
 ### Before
 
@@ -103,12 +88,14 @@ char greeting[] = "Hello";
 const char* const p = greeting;
 ```
 
+[回答へ移動](#item3-q2-3-answer)
+
 ---
 
 ## 3. 戻り値 `const`（歴史的文脈）
 
 <a id="item3-q3"></a>
-### Q3
+#### Q3
 この変更は、どんな代入ミスを防ごうとしていますか？
 
 [回答へ移動](#item3-q3-answer)
@@ -143,7 +130,7 @@ if (a * b = c) {}  // == のつもりで =
 ## 4. `operator[]` の const穴を塞ぐ
 
 <a id="item3-q4"></a>
-### Q4
+#### Q4
 `const` オブジェクトからの書き換えを防ぐには、どこまで `const` が必要ですか？
 
 [回答へ移動](#item3-q4-answer)
@@ -185,7 +172,7 @@ private:
 ## 5. `const` メンバ関数で内部更新する (`mutable`)
 
 <a id="item3-q5"></a>
-### Q5
+#### Q5
 外から見て不変を保ちながら、内部キャッシュだけ更新するには？
 
 [回答へ移動](#item3-q5-answer)
@@ -220,7 +207,7 @@ private:
 ## 6. const版/non-const版の重複を消す
 
 <a id="item3-q6"></a>
-### Q6
+#### Q6
 同じロジックを2回書かずに、どちらを本体にすべきですか？
 
 [回答へ移動](#item3-q6-answer)
@@ -255,7 +242,7 @@ char& operator[](std::size_t pos) {
 ## 7. 逆方向は危険（const -> non-const）
 
 <a id="item3-q7"></a>
-### Q7
+#### Q7
 なぜAfter側のほうが安全ですか？
 
 [回答へ移動](#item3-q7-answer)
@@ -281,7 +268,7 @@ const char& operator[](std::size_t pos) const {
 ## 8. ローカル変数にも `const`
 
 <a id="item3-q8"></a>
-### Q8
+#### Q8
 ローカルに `const` を付ける価値は何ですか？
 
 [回答へ移動](#item3-q8-answer)
@@ -308,7 +295,7 @@ void process() {
 
 ## 9. `iterator` と `const_iterator` の違い
 
-### 9-1. iterator 自体を `const` にする
+#### 9-1. iterator 自体を `const` にする
 
 <a id="item3-q9-1"></a>
 [回答へ移動](#item3-q9-1-answer)
@@ -327,7 +314,7 @@ const std::vector<int>::iterator it = v.begin();
 
 ---
 
-### 9-2. 指す先を `const` にする
+#### 9-2. 指す先を `const` にする
 
 <a id="item3-q9-2"></a>
 [回答へ移動](#item3-q9-2-answer)
@@ -349,11 +336,29 @@ std::vector<int>::const_iterator it = v.begin();
 
 ## 回答集
 
-### Answer 1
+#### Answer 1
 <a id="item3-q1-answer"></a>
-**回答:** `char*` が嘘になっています。  
+
+**回答:** 問題があるのは、引数の型が `char*` になっている部分です。  
 この関数は文字列を**読むだけ**なのに、`char*` だと「呼び出し先で文字列を書き換えるかもしれない」宣言に見えます。  
 `const char*` に変えることで、**この関数は入力文字列を変更しない**ことを型で示せます。
+
+#### 悪いコード（Before）
+
+```cpp
+void printName(char* name) {
+    std::cout << name << '\n';
+}
+```
+
+#### 良いコード（After）
+
+```cpp
+void printName(const char* name) {
+    std::cout << name << '\n';
+}
+```
+
 
 **意図:**
 - APIの意図を明確にする
@@ -370,7 +375,7 @@ std::vector<int>::const_iterator it = v.begin();
 
 [問いに戻る](#item3-q1)
 
-### Answer 2-1
+#### Answer 2-1
 <a id="item3-q2-1-answer"></a>
 **回答:** 変更不能になるのは、**`p` が指している先のデータ**です。  
 `const char* p` は、ポインタ `p` 自体は別の場所を指せますが、`*p` 経由で文字を書き換えることはできません。
@@ -390,7 +395,7 @@ std::vector<int>::const_iterator it = v.begin();
 
 [問いに戻る](#item3-q2-1)
 
-### Answer 2-2
+#### Answer 2-2
 <a id="item3-q2-2-answer"></a>
 **回答:** 変更不能になるのは、**ポインタ `p` 自体**です。  
 `char* const p` は、`p` が一度どこかを指したら、**別の場所を指し直せません**。  
@@ -411,7 +416,7 @@ std::vector<int>::const_iterator it = v.begin();
 
 [問いに戻る](#item3-q2-2)
 
-### Answer 2-3
+#### Answer 2-3
 <a id="item3-q2-3-answer"></a>
 **回答:** 変更不能になるのは、  
 1. **`p` が指す先のデータ**  
@@ -438,7 +443,7 @@ std::vector<int>::const_iterator it = v.begin();
 
 [問いに戻る](#item3-q2-3)
 
-### Answer 3
+#### Answer 3
 <a id="item3-q3-answer"></a>
 **回答:** 防ごうとしているのは、**比較のつもりで代入を書いてしまう事故**です。  
 
@@ -470,7 +475,7 @@ if (a * b = c) {}
 
 [問いに戻る](#item3-q3)
 
-### Answer 4
+#### Answer 4
 <a id="item3-q4-answer"></a>
 **回答:** 必要なのは、**メンバ関数そのもの**だけでなく、**戻り値**まで含めた `const` です。  
 
@@ -503,7 +508,7 @@ const char& operator[](std::size_t pos) const
 
 [問いに戻る](#item3-q4)
 
-### Answer 5
+#### Answer 5
 <a id="item3-q5-answer"></a>
 **回答:** `mutable` を使います。  
 
@@ -536,7 +541,7 @@ mutable bool lengthIsValid;
 
 [問いに戻る](#item3-q5)
 
-### Answer 6
+#### Answer 6
 <a id="item3-q6-answer"></a>
 **回答:** 本体にすべきなのは **const版** です。  
 
@@ -574,7 +579,7 @@ char& operator[](std::size_t pos) {
 
 [問いに戻る](#item3-q6)
 
-### Answer 7
+#### Answer 7
 <a id="item3-q7-answer"></a>
 **回答:** After側のほうが安全なのは、**const関数の契約を壊しにくい**からです。  
 
@@ -609,7 +614,7 @@ After側では、const版は素直に constな処理を行い、
 
 [問いに戻る](#item3-q7)
 
-### Answer 8
+#### Answer 8
 <a id="item3-q8-answer"></a>
 **回答:** ローカル変数に `const` を付ける価値は、**意図の固定** と **誤代入防止** にあります。  
 
@@ -639,7 +644,7 @@ const double rate = computeRate();
 
 [問いに戻る](#item3-q8)
 
-### Answer 9-1
+#### Answer 9-1
 <a id="item3-q9-1-answer"></a>
 **回答:** `const std::vector<int>::iterator it` で `const` になっているのは、**iterator 自体**です。  
 
@@ -666,7 +671,7 @@ const double rate = computeRate();
 
 [問いに戻る](#item3-q9-1)
 
-### Answer 9-2
+#### Answer 9-2
 <a id="item3-q9-2-answer"></a>
 **回答:** `std::vector<int>::const_iterator it` で `const` になっているのは、**iterator が指す先**です。  
 
