@@ -105,9 +105,8 @@ const Rational operator*(const Rational& lhs,
 ---
 
 <a id="item3-q6"></a>
-#### Q6 次の `TextBlock` に `operator[]` を追加し、実装は `text[pos]` にアクセスするものとする。
-`const TextBlock tb` について次の**両方**を満たしたい。
-
+#### Q6 次の `TextBlock` に `operator[]` を追加することを考える。
+実装は `text[pos]` にアクセスするものとする。
 ```cpp
 class TextBlock {
 public:
@@ -117,6 +116,7 @@ private:
 };
 ```
 
+`const TextBlock tb` について次の**両方**を満たしたい。
 - (条件1) `tb[i]` で文字を読める  
 - (条件2) `tb[i] = 'x';` はコンパイルエラーにしたい  
 
