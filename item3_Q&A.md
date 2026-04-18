@@ -2,8 +2,6 @@
 
 ---
 
-## 1. 読み取り専用引数に `const` を付ける
-
 <a id="item3-q1"></a>
 #### Q1 この関数宣言のどの部分が、「この関数は文字列を書き換えるかもしれない」という**誤った印象**を与えていますか？
 
@@ -18,96 +16,83 @@ void printName(char* name) {
 
 ---
 
-## 2. ポインタの `const`（どこを守るか）
-
-#### 2-1. 指す先データを守る
-
-<a id="item3-q2-1"></a>
-### Q2-1
-次の修正によって何が変更不能になりますか？
+<a id="item3-q2"></a>
+#### Q2 次の修正によって何が変更不能になりますか？
 
 
-### Before
+#### Before
 
 ```cpp
 char greeting[] = "Hello";
 char* p = greeting;
 ```
 
-### After
+#### After
 
 ```cpp
 char greeting[] = "Hello";
 const char* p = greeting;
 ```
 
-[回答へ移動](#item3-q2-1-answer)
+[回答へ移動](#item3-q2-answer)
 
 ---
 
-#### 2-2. ポインタ自身を守る
-
-<a id="item3-q2-2"></a>
-#### Q2-2 次の修正によって何が変更不能になりますか？
+<a id="item3-q3"></a>
+#### Q3 次の修正によって何が変更不能になりますか？
 
 
-### Before
+#### Before
 
 ```cpp
 char greeting[] = "Hello";
 char* p = greeting;
 ```
 
-### After
+#### After
 
 ```cpp
 char greeting[] = "Hello";
 char* const p = greeting;
 ```
 
-[回答へ移動](#item3-q2-2-answer)
+[回答へ移動](#item3-q3-answer)
 
 ---
 
-#### 2-3. 両方を守る
+<a id="item3-q4"></a>
+#### Q4 次の修正によってどの2つが変更不能になりますか？
 
-<a id="item3-q2-3"></a>
-#### Q2-3 次の修正によってどの2つが変更不能になりますか？
-
-### Before
+#### Before
 
 ```cpp
 char greeting[] = "Hello";
 char* p = greeting;
 ```
 
-### After
+#### After
 
 ```cpp
 char greeting[] = "Hello";
 const char* const p = greeting;
 ```
 
-[回答へ移動](#item3-q2-3-answer)
+
+[回答へ移動](#item3-q4-answer)
 
 ---
 
-## 3. 戻り値 `const`（歴史的文脈）
+<a id="item3-q5"></a>
+#### Q5 この変更は、どんな代入ミスを防ごうとしていますか？
 
-<a id="item3-q3"></a>
-#### Q3
-この変更は、どんな代入ミスを防ごうとしていますか？
-
-[回答へ移動](#item3-q3-answer)
-
-### Before
+#### Before
 
 ```cpp
 Rational operator*(const Rational& lhs,
                    const Rational& rhs);
 ```
 
-### After
+#### After
 
 ```cpp
 const Rational operator*(const Rational& lhs,
@@ -125,17 +110,15 @@ if (a * b = c) {}  // == のつもりで =
 - Item 3の文脈では有名な教材
 - 現代C++では、値返しに `const` は通常推奨されない
 
+
+[回答へ移動](#item3-q5-answer)
+
 ---
 
-## 4. `operator[]` の const穴を塞ぐ
+<a id="item3-q6"></a>
+#### Q6 `const` オブジェクトからの書き換えを防ぐには、どこまで `const` が必要ですか？
 
-<a id="item3-q4"></a>
-#### Q4
-`const` オブジェクトからの書き換えを防ぐには、どこまで `const` が必要ですか？
-
-[回答へ移動](#item3-q4-answer)
-
-### Before
+#### Before
 
 ```cpp
 class TextBlock {
@@ -149,7 +132,7 @@ private:
 };
 ```
 
-### After
+#### After
 
 ```cpp
 class TextBlock {
@@ -167,17 +150,15 @@ private:
 };
 ```
 
+
+[回答へ移動](#item3-q6-answer)
+
 ---
 
-## 5. `const` メンバ関数で内部更新する (`mutable`)
+<a id="item3-q7"></a>
+#### Q7 外から見て不変を保ちながら、内部キャッシュだけ更新するには？
 
-<a id="item3-q5"></a>
-#### Q5
-外から見て不変を保ちながら、内部キャッシュだけ更新するには？
-
-[回答へ移動](#item3-q5-answer)
-
-### Before
+#### Before
 
 ```cpp
 class CTextBlock {
@@ -188,7 +169,7 @@ private:
 };
 ```
 
-### After
+#### After
 
 ```cpp
 class CTextBlock {
@@ -202,17 +183,15 @@ private:
 ### ポイント
 - `mutable` は logical constness を実現する道具
 
+
+[回答へ移動](#item3-q7-answer)
+
 ---
 
-## 6. const版/non-const版の重複を消す
+<a id="item3-q8"></a>
+#### Q8 同じロジックを2回書かずに、どちらを本体にすべきですか？
 
-<a id="item3-q6"></a>
-#### Q6
-同じロジックを2回書かずに、どちらを本体にすべきですか？
-
-[回答へ移動](#item3-q6-answer)
-
-### Before
+#### Before
 
 ```cpp
 char& operator[](std::size_t pos) {
@@ -223,7 +202,7 @@ char& operator[](std::size_t pos) {
 }
 ```
 
-### After
+#### After
 
 ```cpp
 char& operator[](std::size_t pos) {
@@ -237,17 +216,15 @@ char& operator[](std::size_t pos) {
 - const版を single source of truth にする
 - `non-const -> const` の呼び出しは有効な整理法
 
+
+[回答へ移動](#item3-q8-answer)
+
 ---
 
-## 7. 逆方向は危険（const -> non-const）
+<a id="item3-q9"></a>
+#### Q9 なぜAfter側のほうが安全ですか？
 
-<a id="item3-q7"></a>
-#### Q7
-なぜAfter側のほうが安全ですか？
-
-[回答へ移動](#item3-q7-answer)
-
-### Before
+#### Before
 
 ```cpp
 const char& operator[](std::size_t pos) const {
@@ -255,7 +232,7 @@ const char& operator[](std::size_t pos) const {
 }
 ```
 
-### After
+#### After
 
 ```cpp
 const char& operator[](std::size_t pos) const {
@@ -263,17 +240,16 @@ const char& operator[](std::size_t pos) const {
 }
 ```
 
+
+[回答へ移動](#item3-q9-answer)
+
 ---
 
-## 8. ローカル変数にも `const`
+<a id="item3-q10"></a>
+#### Q10 ローカルに `const` を付ける価値は何ですか？
 
-<a id="item3-q8"></a>
-#### Q8
-ローカルに `const` を付ける価値は何ですか？
 
-[回答へ移動](#item3-q8-answer)
-
-### Before
+#### Before
 
 ```cpp
 void process() {
@@ -282,7 +258,7 @@ void process() {
 }
 ```
 
-### After
+#### After
 
 ```cpp
 void process() {
@@ -291,46 +267,48 @@ void process() {
 }
 ```
 
+
+[回答へ移動](#item3-q10-answer)
+
 ---
 
-## 9. `iterator` と `const_iterator` の違い
+#### Q11. iterator 自体を `const` にする
 
-#### 9-1. iterator 自体を `const` にする
+<a id="item3-q11"></a>
 
-<a id="item3-q9-1"></a>
-[回答へ移動](#item3-q9-1-answer)
-
-### Before
+#### Before
 
 ```cpp
 std::vector<int>::iterator it = v.begin();
 ```
 
-### After
+#### After
 
 ```cpp
 const std::vector<int>::iterator it = v.begin();
 ```
 
+
+[回答へ移動](#item3-q11-answer)
+
 ---
 
-#### 9-2. 指す先を `const` にする
+<a id="item3-q12"></a>
 
-<a id="item3-q9-2"></a>
-[回答へ移動](#item3-q9-2-answer)
-
-### Before
+#### Before
 
 ```cpp
 std::vector<int>::iterator it = v.begin();
 ```
 
-### After
+#### After
 
 ```cpp
 std::vector<int>::const_iterator it = v.begin();
 ```
 
+
+[回答へ移動](#item3-q12-answer)
 
 ---
 
@@ -363,10 +341,7 @@ void printName(const char* name) {
 **意図:**
 - APIの意図を明確にする
 - 誤って書き換えるコードをコンパイラに止めてもらう
-- 呼び出し側に安心感を与える
-
-**一言でいうと:**  
-**「変更しないなら、`const` を付けて“読むだけ”を契約にする」**
+- 呼び出し側に値が更新されないことが伝え、安心感を与える
 
 **記載根拠（日本語版）:**  
 - **p.8**: 「オブジェクトの値を変更するつもりがないのであれば、`const` を付けるべきです。それにより、コンパイラも助けてくれるからです。」  
@@ -375,8 +350,8 @@ void printName(const char* name) {
 
 [問いに戻る](#item3-q1)
 
-#### Answer 2-1
-<a id="item3-q2-1-answer"></a>
+#### Answer 2
+<a id="item3-q2-answer"></a>
 **回答:** 変更不能になるのは、**`p` が指している先のデータ**です。  
 `const char* p` は、ポインタ `p` 自体は別の場所を指せますが、`*p` 経由で文字を書き換えることはできません。
 
@@ -393,10 +368,10 @@ void printName(const char* name) {
 - **p.9**: 「`const` がアスタリスク（*）の左にあるときは、『ポインタが指し示すデータ』が不変とされ…」と説明されている。  
 - **p.9**: `void f1(const Widget *pw);` と `void f2(Widget const *pw);` が同じ意味だと示され、`*` の左側の `const` が「指す先」を守ることが確認できる。
 
-[問いに戻る](#item3-q2-1)
+[問いに戻る](#item3-q2)
 
-#### Answer 2-2
-<a id="item3-q2-2-answer"></a>
+#### Answer 3
+<a id="item3-q3-answer"></a>
 **回答:** 変更不能になるのは、**ポインタ `p` 自体**です。  
 `char* const p` は、`p` が一度どこかを指したら、**別の場所を指し直せません**。  
 ただし、指している先のデータは変更できます。
@@ -414,10 +389,10 @@ void printName(const char* name) {
 - **p.9**: 「`const` がアスタリスクの右にあるときは、『ポインタそのもの』が不変とされるわけです」と説明されている。  
 - **p.9**: p.8の4パターンを受けて、「アスタリスクの両側に `const` があれば、データもポインタも不変」という整理につながっている。
 
-[問いに戻る](#item3-q2-2)
+[問いに戻る](#item3-q3)
 
-#### Answer 2-3
-<a id="item3-q2-3-answer"></a>
+#### Answer 4
+<a id="item3-q4-answer"></a>
 **回答:** 変更不能になるのは、  
 1. **`p` が指す先のデータ**  
 2. **ポインタ `p` 自体**  
@@ -441,10 +416,10 @@ void printName(const char* name) {
 - **p.9**: 「アスタリスクの両側に `const` があれば、データもポインタも不変ということになります」と説明されている。  
 - **p.8–9**: p.8の4例とp.9の整理説明が、`const` の位置によって何を守るかが変わることの直接的根拠になっている。
 
-[問いに戻る](#item3-q2-3)
+[問いに戻る](#item3-q4)
 
-#### Answer 3
-<a id="item3-q3-answer"></a>
+#### Answer 5
+<a id="item3-q5-answer"></a>
 **回答:** 防ごうとしているのは、**比較のつもりで代入を書いてしまう事故**です。  
 
 たとえば:
@@ -462,21 +437,27 @@ if (a * b = c) {}
 - `==` と `=` の打ち間違い事故を減らす
 - 型でおかしな操作を拒否する
 
-**ただし重要:**  
-これは **Effective C++ Item 3 の歴史的な文脈では良い教材**ですが、  
-**現代C++では値返しに `const` を付けるのは通常推奨されません。**  
-勉強会ではここを分けて説明すると丁寧です。
+**重要:**  
+ただし、**現代C++では値返しに `const` を付けるのは通常推奨されません。**  
+**C++11** でムーブ構築・ムーブ代入（右辺値参照と std::move を中心としたモデル）が標準になったことで、戻り値を const T にすると、その一時オブジェクトから T&& へのムーブがしづらい値で返す T が、戻り値最適化に加えて ムーブともきちんと噛み合うという理由で、「値返しにトップレベル const を付ける」スタイルは C++11 以降では避けるのが主流になりました。
+
+**それ以前（C++03 時代）**
+ムーブがないので、const Rational 返しのデメリットは今ほど目立ちませんでした。
+Scott Meyers の Effective 第 3 版（C++98/03 文脈）では、一時への変な代入を防ぐ意味で const 付き値返しが紹介されることもありましたが、言語仕様として「C++11 から Before に切り替えよ」と決まっているわけではなく、ムーブが入ったあとの実務・ガイドラインの合意が変わった、と理解するのが正確です。
 
 **記載根拠（日本語版）:**  
 - **p.10**: `const Rational operator*(const Rational& lhs, const Rational& rhs);` の例が掲載されている。  
 - **p.10**: `(a * b) = c` の例に対して、「『2つの数の積に別の値を代入する』というおかしな操作」と説明されている。  
 - **p.10**: `if (a * b = c) ...` の例に「おっと、比較のつもりだったのに！」とあり、`=` と `==` の誤用防止が意図として示されている。  
-- **p.10**: 「*演算子の戻り値を const にしておけば、そのようなことが避けられるのです」と説明されている。
+- **p.10**: 「*演算子の戻り値を const にしておけば、そのようなことが避けられるのです」と説明されている。  
+- [C++ Core Guidelines F.49: Don't return const T](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines.html#f49-dont-return-const-t)
 
-[問いに戻る](#item3-q3)
 
-#### Answer 4
-<a id="item3-q4-answer"></a>
+
+[問いに戻る](#item3-q5)
+
+#### Answer 6
+<a id="item3-q6-answer"></a>
 **回答:** 必要なのは、**メンバ関数そのもの**だけでなく、**戻り値**まで含めた `const` です。  
 
 つまり:
@@ -506,10 +487,10 @@ const char& operator[](std::size_t pos) const
 - **p.12**: `ctb[0] = 'x';` が「// エラー！」になる理由として、「const な [] 演算子の戻り値を const にしたからです」と明記されている。  
 - **p.12**: 「エラーは、『const char&』である [] 演算子の戻り値（ctb[0]）に値を代入しようとしたことで起こるのです」と説明されている。
 
-[問いに戻る](#item3-q4)
+[問いに戻る](#item3-q6)
 
-#### Answer 5
-<a id="item3-q5-answer"></a>
+#### Answer 7
+<a id="item3-q7-answer"></a>
 **回答:** `mutable` を使います。  
 
 `length()` のような `const` メンバ関数では、通常はメンバ変数を変更できません。  
@@ -539,10 +520,10 @@ mutable bool lengthIsValid;
 - **p.14**: 「答は簡単です。mutable を使うのです。mutable は static でないデータメンバをビットレベルの不変性の制約から解き放ちます」と明記されている。  
 - **p.15**: `mutable std::size_t textLength;` と `mutable bool lengthIsValid;` を使った解決版が掲載されている。
 
-[問いに戻る](#item3-q5)
+[問いに戻る](#item3-q7)
 
-#### Answer 6
-<a id="item3-q6-answer"></a>
+#### Answer 8
+<a id="item3-q8-answer"></a>
 **回答:** 本体にすべきなのは **const版** です。  
 
 non-const版でロジックを二重に持つと、
@@ -577,10 +558,10 @@ char& operator[](std::size_t pos) {
 - **p.16**: `return const_cast<char&>( static_cast<const TextBlock&>(*this)[position] );` という non-const版から const版を呼ぶ実装例がそのまま掲載されている。  
 - **p.17**: 「非 const な関数の中で const な関数を呼び出しています… const な [] 演算子の実装に const な [] 演算子を使う方法で、コードの重複を避けることができた」と説明されている。
 
-[問いに戻る](#item3-q6)
+[問いに戻る](#item3-q8)
 
-#### Answer 7
-<a id="item3-q7-answer"></a>
+#### Answer 9
+<a id="item3-q9-answer"></a>
 **回答:** After側のほうが安全なのは、**const関数の契約を壊しにくい**からです。  
 
 Before側では:
@@ -612,10 +593,10 @@ After側では、const版は素直に constな処理を行い、
 - **p.17**: 「const なメンバ関数は、そのオブジェクトの状態を変えないと保証するものです。非 const なメンバ関数はそのような保証をしません」と説明されている。  
 - **p.17**: 「これから、const なメンバ関数の実装に非 const なメンバ関数を使うのは誤り、と言えます」と結論づけている。
 
-[問いに戻る](#item3-q7)
+[問いに戻る](#item3-q9)
 
-#### Answer 8
-<a id="item3-q8-answer"></a>
+#### Answer 10
+<a id="item3-q10-answer"></a>
 **回答:** ローカル変数に `const` を付ける価値は、**意図の固定** と **誤代入防止** にあります。  
 
 ```cpp
@@ -642,10 +623,10 @@ const double rate = computeRate();
 - **p.10**: 「仮引数に限らず、一般のローカルなオブジェクトも、その内容を変更する必要がなければ、const を付けて宣言するべきです」と明記されている。  
 - **p.10**: 「たった6文字のタイプを加えるだけで、今見たような『== のつもりだったのに = としてしまった』という…エラーから身を守ることになる」と説明されている。
 
-[問いに戻る](#item3-q8)
+[問いに戻る](#item3-q10)
 
-#### Answer 9-1
-<a id="item3-q9-1-answer"></a>
+#### Answer 11
+<a id="item3-q11-answer"></a>
 **回答:** `const std::vector<int>::iterator it` で `const` になっているのは、**iterator 自体**です。  
 
 これはポインタでいうと **`T* const`** に対応します。  
@@ -669,10 +650,10 @@ const double rate = computeRate();
 - **p.9**: `const std::vector<int>::iterator iter = vec.begin();` の例に対して、「`T* const` のように振舞う反復子」と書かれている。  
 - **p.9**: 同じ例で `*iter = 10;` は「iter が指すものの内容を変更しても問題ない」、`++iter;` は「エラー！ iter は const だから」と説明されている。
 
-[問いに戻る](#item3-q9-1)
+[問いに戻る](#item3-q11)
 
-#### Answer 9-2
-<a id="item3-q9-2-answer"></a>
+#### Answer 12
+<a id="item3-q12-answer"></a>
 **回答:** `std::vector<int>::const_iterator it` で `const` になっているのは、**iterator が指す先**です。  
 
 これはポインタでいうと **`const T*`** に対応します。  
@@ -699,4 +680,4 @@ const double rate = computeRate();
 - **p.9**: `*cIter = 10;` は「エラー！ *cIter は const だから」、`++cIter;` は「cIter を変えても問題ない」と明記されている。  
 - **p.9**: 「『指し示しているものの内容を変更しない反復子』… は `const_iterator` で表されます」と説明されている。
 
-[問いに戻る](#item3-q9-2)
+[問いに戻る](#item3-q12)
