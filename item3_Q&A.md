@@ -49,7 +49,7 @@ const char* p = greeting;
 <a id="item3-q3"></a>
 #### Q3 `operator*` の戻り値を `const Rational` にしたときの主な狙いとして、最も適切なのはどれか。
 
-#### Before
+#### 修正前
 
 ```cpp
 Rational operator*(
@@ -58,7 +58,7 @@ Rational operator*(
 );
 ```
 
-#### After
+#### 修正後
 
 ```cpp
 const Rational operator*(
@@ -115,34 +115,22 @@ char& operator[](std::size_t pos);
 ---
 
 <a id="item3-q5"></a>
-#### Q5 `length() const` 内でキャッシュ `textLength` / `lengthIsValid` を更新したい。**Before** と **After** の差分どおり、キャッシュ用メンバに付けるべき指定はどれか。
-
-#### Before
-
-```cpp
-class CTextBlock {
-    private:
-        char* pText;
-        std::size_t textLength;
-        bool lengthIsValid;
-};
-```
-
-#### After
+#### Q5 `length() const` 内でキャッシュ `textLength` / `lengthIsValid` を更新したい。
+次のコードでは、1行目のメンバに付ける指定を **X**、2行目のメンバに付ける指定を **Y** とする（`X` と `Y` には `static` / `mutable` などのキーワードが入る）。**X と Y の組み合わせ**として適切なのは次のうちどれか。
 
 ```cpp
 class CTextBlock {
     private:
         char* pText;
-        mutable std::size_t textLength;
-        mutable bool lengthIsValid;
+        __X__ std::size_t textLength;
+        __Y__ bool lengthIsValid;
 };
 ```
 
-- **A.** `static`  
-- **B.** `constexpr`  
-- **C.** `mutable`  
-- **D.** `volatile`  
+- **A.** __X__: `mutable`, __Y__: `mutable`  
+- **B.** __X__: `static`, __Y__: `static`  
+- **C.** __X__: `mutable`, __Y__: `static`  
+- **D.** __X__: `constexpr`,__Y__: `volatile`  
 
 [回答へ移動](#item3-q5-answer)
 
@@ -420,9 +408,9 @@ const char& operator[](std::size_t pos) const
 
 #### Answer 5
 <a id="item3-q5-answer"></a>
-**正答:** **C**
+**正答:** **A**
 
-**回答:** キャッシュ用メンバに **`mutable`** を付ける。
+**回答:** **X も Y も `mutable`** が適切である（選択肢 **A**）。キャッシュ用の両メンバに **`mutable`** を付ける。
 
 `const` メンバ内では通常メンバを変更できないが、`mutable` 付きメンバは **bitwise const** の制約から外れ、`const` メンバからも書き換えられる。キャッシュのように **logical constness**（外から見た不変）だけ保てばよい場合に使う。
 
