@@ -67,7 +67,7 @@ const Rational operator*(
 
 ---
 
-#### Q4 次の `TextBlock` に `operator[]` を追加するとき、以下の条件1, 2を満たす**適切な宣言の組み合わせ**は次のうちどれか。実装は `text[pos]` にアクセスするものとする。
+#### Q4 次の `TextBlock` に `operator[]` を追加するとき、以下の条件1, 2を満たす**適切な宣言の組み合わせ**は次のうちどれか。実装は `text[position]` にアクセスするものとする。
 
 ```cpp
 class TextBlock {
@@ -84,20 +84,20 @@ class TextBlock {
 
 **A.** 
 ```cpp
-char& operator[](std::size_t pos) const;
+char& operator[](std::size_t position) const;
 ```
 **B.** 
 ```cpp
-const char& operator[](std::size_t pos);
+const char& operator[](std::size_t position);
 ```
 **C.** 
 ```cpp
-char& operator[](std::size_t pos);
+char& operator[](std::size_t position);
 ```
 **D.**
 ```cpp
-const char& operator[](std::size_t pos) const;
-char& operator[](std::size_t pos);
+const char& operator[](std::size_t position) const;
+char& operator[](std::size_t position);
 ```
 
 ---
@@ -127,13 +127,13 @@ class CTextBlock {
 
 ---
 
-#### Q6 次のような `TextBlock` があり、`operator[]` は次の2つを宣言するものとする（実装はいずれも `text[pos]` にアクセスする想定）。
+#### Q6 次のような `TextBlock` があり、`operator[]` は次の2つを宣言するものとする（実装はいずれも `text[position]` にアクセスする想定）。
 
 ```cpp
 class TextBlock {
     public:
-        const char& operator[](std::size_t pos) const;  // const な TextBlock 向け（読み取り）
-        char& operator[](std::size_t pos);              // 非 const の TextBlock 向け（書き換え可能な参照）
+        const char& operator[](std::size_t position) const;  // const な TextBlock 向け（読み取り）
+        char& operator[](std::size_t position);              // 非 const の TextBlock 向け（書き換え可能な参照）
 
     private:
         std::string text;
@@ -141,31 +141,31 @@ class TextBlock {
 ```
 
 境界チェック・ログ・整合性チェックなどの処理を**二重に書かない**ために、**どちらのオーバーロードの実装を「本体」（ロジックの唯一の置き場）にすべきか**。  
-下の **コード1** と **コード2** は、その方針を示した **`char& operator[](std::size_t pos)` 側の実装例**である（2択）。
+下の **コード1** と **コード2** は、その方針を示した **`char& operator[](std::size_t position)` 側の実装例**である（2択）。
 
 #### コード1
 
 ```cpp
-char& operator[](std::size_t pos) {
+char& operator[](std::size_t position) {
     // 境界チェック
     // ログ
     // 整合性チェック
-    return text[pos];
+    return text[position];
 }
 ```
 
 #### コード2
 
 ```cpp
-char& operator[](std::size_t pos) {
+char& operator[](std::size_t position) {
     return const_cast<char&>(
-        static_cast<const TextBlock&>(*this)[pos]
+        static_cast<const TextBlock&>(*this)[position]
     );
 }
 ```
 
-- **コード1：** 本体は **`char& operator[](std::size_t pos)`** にだけ書き、**`const char& operator[](std::size_t pos) const`** は別の実装でよい  
-- **コード2：** 本体は **`const char& operator[](std::size_t pos) const`** にまとめ、**`char& operator[](std::size_t pos)`** はその実装を呼び出して再利用する  
+- **コード1：** 本体は **`char& operator[](std::size_t position)`** にだけ書き、**`const char& operator[](std::size_t position) const`** は別の実装でよい  
+- **コード2：** 本体は **`const char& operator[](std::size_t position) const`** にまとめ、**`char& operator[](std::size_t position)`** はその実装を呼び出して再利用する  
 
 ---
 
@@ -174,20 +174,20 @@ char& operator[](std::size_t pos) {
 #### コード1
 
 ```cpp
-const char& operator[](std::size_t pos) const {
-    return const_cast<TextBlock&>(*this)[pos];
+const char& operator[](std::size_t position) const {
+    return const_cast<TextBlock&>(*this)[position];
 }
 ```
 
 #### コード2
 
 ```cpp
-const char& operator[](std::size_t pos) const {
-    return text[pos];
+const char& operator[](std::size_t position) const {
+    return text[position];
 }
 ```
 
 - **A.** `const_cast` が使えなくなるため、実行時オーバーヘッドが消える  
-- **B.** `text[pos]` が常に例外を投げないため  
+- **B.** `text[position]` が常に例外を投げないため  
 - **C.** 暗黙の型変換が起きないため  
 - **D.** const メンバ関数の契約（オブジェクトを変えないという期待）を壊しにくい  
