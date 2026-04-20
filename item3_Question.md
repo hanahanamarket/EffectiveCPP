@@ -36,7 +36,7 @@ const char* p = greeting;
 - **A.** `greeting` 配列の各要素そのもの（配列宣言に `const` が付いたのと同じ）  
 - **B.** ポインタ `p` 自体（`p` に別のアドレスを代入できなくなる）  
 - **C.** `greeting` の宣言全体  
-- **D.** `p` が指す先のデータ（`*p` で辿る内容）  
+- **D.** `p` が指す先のデータ（`*p` でたどる内容）  
 
 ---
 
@@ -127,9 +127,23 @@ class CTextBlock {
 
 ---
 
-#### Q6 `operator[]` の実装を二重に持たないようにする場合、**どちらを「本体」（実装の唯一の置き場）にすべきか**。
+#### Q6 次のような `TextBlock` があり、`operator[]` は次の2つを宣言するものとする（実装はいずれも `text[pos]` にアクセスする想定）。
 
-#### Before
+```cpp
+class TextBlock {
+    public:
+        const char& operator[](std::size_t pos) const;  // const な TextBlock 向け（読み取り）
+        char& operator[](std::size_t pos);              // 非 const の TextBlock 向け（書き換え可能な参照）
+
+    private:
+        std::string text;
+};
+```
+
+境界チェック・ログ・整合性チェックなどの処理を**二重に書かない**ために、**どちらのオーバーロードの実装を「本体」（ロジックの唯一の置き場）にすべきか**。  
+下の **コード1** と **コード2** は、その方針を示した **`char& operator[](std::size_t pos)` 側の実装例**である（2択）。
+
+#### コード1
 
 ```cpp
 char& operator[](std::size_t pos) {
@@ -140,7 +154,7 @@ char& operator[](std::size_t pos) {
 }
 ```
 
-#### After
+#### コード2
 
 ```cpp
 char& operator[](std::size_t pos) {
@@ -150,16 +164,14 @@ char& operator[](std::size_t pos) {
 }
 ```
 
-- **A.** const 版を本体にし、non-const 版はそれを呼び出して再利用する  
-- **B.** non-const 版のみを本体にし、const 版は別実装でよい  
-- **C.** どちらを本体にしても同じである  
-- **D.** 両方に同じロジックを複製して書くのが最も安全である  
+- **コード1：** 本体は **`char& operator[](std::size_t pos)`** にだけ書き、**`const char& operator[](std::size_t pos) const`** は別の実装でよい  
+- **コード2：** 本体は **`const char& operator[](std::size_t pos) const`** にまとめ、**`char& operator[](std::size_t pos)`** はその実装を呼び出して再利用する  
 
 ---
 
-#### Q7 次の **Before** と **After** を比べたとき、**After 側が安全とされる主な理由**はどれか。
+#### Q7 次の **コード1** と **コード2** を比べたとき、**コード2が安全とされる主な理由**はどれか。
 
-#### Before
+#### コード1
 
 ```cpp
 const char& operator[](std::size_t pos) const {
@@ -167,7 +179,7 @@ const char& operator[](std::size_t pos) const {
 }
 ```
 
-#### After
+#### コード2
 
 ```cpp
 const char& operator[](std::size_t pos) const {

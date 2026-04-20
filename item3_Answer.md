@@ -149,18 +149,18 @@ const char& operator[](std::size_t pos) const
 ---
 
 #### Answer 6
-**正答:** **A**
+**正答:** **コード2**
 
-**回答:** 本体にすべきなのは **const版** です。  
+**回答:** 適切なのは **コード2** である。本体にすべきなのは **`const char& operator[](std::size_t pos) const`** の実装であり、設問の **コード2** が示す考え方に合う。**コード1** の方針は、`const` 版と `char&` 版でロジックが二重になりやすい。
 
-non-const版でロジックを二重に持つと、
+**コード1** のように **`char& operator[](std::size_t pos)`** 側だけに境界チェック・ログ・整合性チェックなどを書くと、
 - 境界チェック
 - ログ
 - 整合性チェック
 
-などが重複し、片方だけ修正漏れする危険があります。  
-そこで **const版を single source of truth（唯一の本体）** にして、  
-non-const版はそれを呼び出して再利用します。
+などが **`const char& operator[](std::size_t pos) const`** 側にも必要になり、重複し、片方だけ修正漏れする危険があります。  
+そこで **`const char& operator[](std::size_t pos) const` を single source of truth（唯一の本体）** にまとめ、  
+**`char& operator[](std::size_t pos)`** はそれを呼び出して再利用します（**コード2**）。
 
 ```cpp
 char& operator[](std::size_t pos) {
@@ -171,18 +171,18 @@ char& operator[](std::size_t pos) {
 ```
 
 **なぜこの向きがよいか:**
-- const版は「読み取り専用」の安全な本体
-- non-const版はそこから `const` を外して使うだけ
+- **`const char& operator[](std::size_t pos) const`** は「読み取り専用」の安全な本体になりやすい
+- **`char& operator[](std::size_t pos)`** はそこから `const` を外して使うだけ
 - 重複が減り、バグ混入箇所が減る
 
 **結論:**  
-**「non-const版を本体にするのではなく、const版を本体にして再利用する」**
+**「コード1 のように `char& operator[](std::size_t pos)` だけを本体にするのではなく、コード2 のように `const char& operator[](std::size_t pos) const` を本体にして再利用する」**
 
 **記載根拠（日本語版）:**  
 - **p.15**: 「const なメンバ関数と非 const なメンバ関数の重複を取り除く」という見出しで、重複削減が主題として扱われている。  
-- **p.15**: `const` 版の `operator[]` に「境界超えのチェック」「アクセスログを取る」「データの整合性をチェック」などをまとめて書く例が出ている。  
+- **p.15**: 末尾が `const` の `operator[]` に「境界超えのチェック」「アクセスログを取る」「データの整合性をチェック」などをまとめて書く例が出ている。  
 - **p.16**: 「ここで [] 演算子の機能をどこか一箇所で実装できればよい… これは、const をキャストで取り除けば、できます」と説明されている。  
-- **p.16**: `return const_cast<char&>( static_cast<const TextBlock&>(*this)[position] );` という non-const版から const版を呼ぶ実装例がそのまま掲載されている。  
+- **p.16**: `return const_cast<char&>( static_cast<const TextBlock&>(*this)[position] );` という、`char&` 返しから `const` 付きの `operator[]` を呼ぶ実装例がそのまま掲載されている。  
 - **p.17**: 「非 const な関数の中で const な関数を呼び出しています… const な [] 演算子の実装に const な [] 演算子を使う方法で、コードの重複を避けることができた」と説明されている。
 
 ---
@@ -190,30 +190,27 @@ char& operator[](std::size_t pos) {
 #### Answer 7
 **正答:** **D**
 
-**回答:** After側のほうが安全なのは、**const関数の契約を壊しにくい**からです。  
+**回答:** コード2のほうが安全なのは、**`const` メンバとしての `operator[]` が、「オブジェクトを変えない」という読み手の期待と、実際の処理内容が食い違いにくい**からです。（設計の説明では、この「期待と実装の約束」を**契約**と呼ぶこともあります。）
 
-Before側では:
+コード1では:
 
 ```cpp
-const char& operator[](std::size_t pos) const {
-    return const_cast<TextBlock&>(*this)[pos];
+const char& operator[](std::size_t pos) const {  // ← const 版 operator[]
+    return const_cast<TextBlock&>(*this)[pos];   // ← non-const 版 operator[] へ
 }
 ```
 
-のように、`const` メンバ関数の中から non-const版へ逃がしています。  
-これは「この関数はオブジェクトを変えません」という期待に反する設計になりやすく、  
-**const契約の破れ目** になります。
+のように、**宣言末尾が `const` の `operator[]`（const 版）の実装の中で、non-const 版の `operator[]` に回す**書き方をしています。  
+`const` 版は「オブジェクトを変えない」ように読めるのに、内部では変更しうるオーバーロードにつながり、**読み手の期待を損ねやすい**です。
 
-After側では、const版は素直に constな処理を行い、  
-必要なら **non-const版から const版を呼ぶ** 形にします。  
-この向きなら、const版が危険な操作をしないので安全です。
+コード2では、**const 版**は `text[pos]` のように読み取りだけにし、  
+必要なら **`char& operator[](std::size_t pos)`（non-const 版）から `const char& operator[](std::size_t pos) const`（const 版）を呼ぶ**形にします。  
+この向きなら、const 版が危険な経路を持たないので安全です。
 
-**原則:**
-- **non-const → const** は再利用として有効
-- **const → non-const** は契約違反を招きやすい
+**向きの整理（どちらも `TextBlock::operator[]` のオーバーロードの話です）:**
+- **non-const 版** `char& operator[](std::size_t pos)` **から** **const 版** `const char& operator[](std::size_t pos) const` **を呼ぶ**のは、ロジックを1か所にまとめるのに有効です。
+- **const 版** `const char& operator[](std::size_t pos) const` **の中から** **non-const 版** `char& operator[](std::size_t pos)` **を呼ぶ**（`const_cast` で non-const の `*this` に戻してから呼ぶ）は、`const` と書いた見え方と裏の動きがずれやすく、避けた方が無難です。
 
-**一言でいうと:**  
-**「const関数は、constらしく振る舞わせる」**
 
 **記載根拠（日本語版）:**  
 - **p.17**: 「この少し奇妙なコードでは、非 const な関数の中で const な関数を呼び出しています」とあり、この方向の再利用が説明されている。  
