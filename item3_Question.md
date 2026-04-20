@@ -67,37 +67,53 @@ const Rational operator*(
 
 ---
 
-#### Q4 次の `TextBlock` に `operator[]` を追加するとき、以下の条件1, 2を満たす**適切な宣言の組み合わせ**は次のうちどれか。実装は `text[position]` にアクセスするものとする。
+#### Q4 次の `TextBlock` に `operator[]` を追加するとき、条件1, 2を満たす**適切な宣言の組み合わせ**は次のうちどれか。
+各実装は {return text[position];} でテキストにアクセスする。
 
+定義
 ```cpp
 class TextBlock {
     public:
-        // ここに operator[] を宣言する
+        // コンストラクタ
+        TextBlock(const std::string& str) : text(str) {}
+        
+        ________// ← A ~ Dのいずれかでoperator[]を宣言
+
     private:
         std::string text;
 };
-```
 
-- (条件1) `tb[i]` で文字を読める  
-- (条件2) `tb[i] = 'x';` はコンパイルエラーにしたい  
+```
+条件
+```cpp
+int main(void) {
+    const TextBlock ctb("hello");
+    std::cout << ctb[0]; //条件1: `tb[i]` で文字を読める
+    ctb[0] = 'x';  //条件2: const版への書き込みはコンパイルエラーとする  
+    
+    TextBlock tb("world");
+    std::cout << tb[0]; //条件3: `tb[i]` で文字を読める
+    tb[0] = 'x';  //条件4:  非const版には書き込みできる
+}
+```
 
 
 **A.** 
 ```cpp
-char& operator[](std::size_t position) const;
+char& operator[](std::size_t position) const {...}
 ```
 **B.** 
 ```cpp
-const char& operator[](std::size_t position);
+const char& operator[](std::size_t position) {...}
 ```
 **C.** 
 ```cpp
-char& operator[](std::size_t position);
+char& operator[](std::size_t position) {...}
 ```
 **D.**
 ```cpp
-const char& operator[](std::size_t position) const;
-char& operator[](std::size_t position);
+const char& operator[](std::size_t position) const {...}
+char& operator[](std::size_t position) {...}
 ```
 
 ---
