@@ -67,7 +67,7 @@ const Rational operator*(
 
 ---
 
-#### Q4 次の `TextBlock` に `operator[]` を追加するとき、条件1, 2を満たす**適切な宣言の組み合わせ**は次のうちどれか。
+#### Q4 次の `TextBlock` に `operator[]` を追加するとき、条件1～４を満たす**適切な宣言の組み合わせ**は次のうちどれか。
 各実装は {return text[position];} でテキストにアクセスする。
 
 定義
