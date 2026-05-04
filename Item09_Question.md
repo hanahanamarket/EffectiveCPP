@@ -94,7 +94,9 @@ int main() {
 
 ### Q3
 
-**以下は第9項の改善案を簡略化したコードです。** `___X___` と `___Y___` についてそれぞれ、本文の改良方針に最も合う選択肢はどれですか。
+**金融商品の取引をモデル化する、継承関係でつながったクラス群があったとします。
+このクラスは、買い(BuyTransaction)や売り(SellTransaction)など取引は監査の対象となるので、取引オブジェクトが生成されるように監査ログに記録するためのコードです。
+**`___X___` と `___Y___` の組み合わせとして適切なものはどれですか。**
 
 ```cpp
 #include <iostream>
@@ -106,7 +108,7 @@ public:
         logTransaction(logInfo);
     }
 
-    void logTransaction(const char* logInfo) const
+    void logTransaction(const char* logInfo) const  // 仮想関数でないメンバー関数
     {
         std::cout << logInfo;
     }
@@ -127,24 +129,11 @@ private:
 
 int main()
 {
-    BuyTransaction b;
+    BuyTransaction b;  // 派生クラスをインスタンス化
 }
 ```
 
-
-**（1）`___X___` の位置に置く構成として、本文の改善案（派生側の情報を基底のコンストラクターへ **`Transaction(createLogString())` と渡すパターン**）に一致するものはどれですか。**
-
-`___X___` はコンストラクター本文より前で基底を初期化する **メンバ初期化子リスト**を置く行です。
-
-- A. `: Transaction(createLogString())`
-- B. メンバ初期化子リストを書かず、コンストラクター本文のみを `{ Transaction(createLogString()); }` とする。
-- C. `: createLogString()`
-- D. メンバ初期化子リストを書かず、コンストラクター本文のみを `{ logTransaction(createLogString()); }` とする。
-
-**（2）`___Y___` の位置に書く記述として、本文の改善案に沿うものはどれですか。**  
-（派生側のログ文字列を、構築途中のオブジェクトへの依存を増やさない形で用意する、という観点です。）
-
-- A. この位置には何も書かない。
-- B. `static`
-- C. `virtual`
-- D. `virtual static`
+- A. `___X___` は  `: Transaction(createLogString())` 、 `___Y___` は `static` とする。
+- B. `___X___` は  `: Transaction(createLogString())` 、 `___Y___` は空白とする。(非 `static` のメンバ関数として宣言する。)
+- C. `___X___` は  `: createLogString()` 、              `___Y___` は `static` とする。
+- D. `___X___` は  `: createLogString()` 、              `___Y___` は空白とする。(非 `static` のメンバ関数として宣言する。)
