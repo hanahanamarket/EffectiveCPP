@@ -31,14 +31,38 @@ void patron() {                                                 // ⅰ
 - **C** `hand_ticket_to_counter` が受け取るのは `int` であり、渡している `mine` は `LibraryTicket` という**別の型**だから、自動では `number_` に格納された `int` 値に置き換わらない。
 - **D** `mine` が保持する伝票番号（`number_`）は `private` だから、コンパイラが読み取れない。
 
-**(2)** `mine` が保持する伝票番号（`number_` の値）をカウンター関数へ渡したい。次のような二種類の対策がある。
+**(2)** `mine` が保持する伝票番号（`number_` の値）をカウンター関数へ渡したい。
 
-- **対策1（明示的な生リソースへのアクセス）** `mine.ticketNumber()` のように、生の `int` を取得する操作を**メンバ関数で明示的に**書いて渡す。
-- **対策2（暗黙の型変換）** `LibraryTicket` を `int` に**暗黙的に型変換できる**ようにして、`hand_ticket_to_counter(mine)` のように短く書けるようにする。
+- **対策1（明示的な生リソースへのアクセス）**
+
+```cpp
+class LibraryTicket {
+    public:
+        explicit LibraryTicket(int number) : number_(number) {}
+        ~LibraryTicket() {}
+        int ticketNumber() const { return number_; }
+    private:
+        int number_;
+};
+```
+
+- **対策2（暗黙の型変換）** … 対策1 に **`operator int()`** を追加した例。
+
+```cpp
+class LibraryTicket {
+    public:
+        explicit LibraryTicket(int number) : number_(number) {}
+        ~LibraryTicket() {}
+        int ticketNumber() const { return number_; }
+        operator int() const { return number_; }
+    private:
+        int number_;
+};
+```
 
 次のうち、**対策1・対策2 の違いと、`LibraryTicket` が伝票番号（生のリソースに相当する `int`）へのアクセスをどう与えるか**について、**適切な説明を一つ**選べ。
 
 - **A** 対策2 の方がコードが短い。**インターフェースを短く書ける方が**常に望ましいから、対策1 より対策2 が優れている。
 - **B** 対策1 も対策2 も、カウンターに渡る値としての `int` は同じであり、かつ **`number_` はどちらも `private` のまま**だから、**型の外から `number_` を直接読めない**という点に限れば、二つの対策に本質的な違いはない。
 - **C** 対策2 を加えても `ticketNumber()` は残せる。**`int` を外へ渡すだけなら暗黙も明示的なアクセスも同じ**で、差は **`mine` と書くか `mine.ticketNumber()` と書くか**にすぎない。
-- **D** 対策2（暗黙変換）では、**`int` の引数や `int` へ代入する式など`int` が要求される所に、`LibraryTicket` をそのまま渡せる**ようになる。**ソースを読んだだけでは、いつ `LibraryTicket` から伝票番号の `int` に置き換わったか気づきにくい**。
+- **D** 対策2（暗黙変換）では、**`int` の引数や `int` へ代入する式など「`int` が要求される所」に、`LibraryTicket` をそのまま渡せる**ようになる。**ソースを読んだだけでは、いつ `LibraryTicket` から伝票番号の `int` に置き換わったか気づきにくい**。

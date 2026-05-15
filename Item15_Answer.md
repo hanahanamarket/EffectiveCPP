@@ -23,6 +23,37 @@
 
 15項は、**明示的なアクセスか暗黙変換か**のトレードオフを扱う。**暗黙**は、**`int` が要求される所に `LibraryTicket`（ラッパ）をそのまま渡せる**ようになり、**ソースだけではコンパイラによる型変換に気づきにくい**。
 
+### 対策のコード例（設問 (2) と同じ）
+
+**対策1**
+
+```cpp
+class LibraryTicket {
+public:
+    explicit LibraryTicket(int number) : number_(number) {}
+    ~LibraryTicket() {}
+    int ticketNumber() const { return number_; }
+private:
+    int number_;
+};
+```
+
+**対策2**
+
+```cpp
+class LibraryTicket {
+public:
+    explicit LibraryTicket(int number) : number_(number) {}
+    ~LibraryTicket() {}
+    int ticketNumber() const { return number_; }
+    operator int() const { return number_; }
+private:
+    int number_;
+};
+```
+
+設問冒頭の `void patron() { … hand_ticket_to_counter(mine); }` と合わせると、**対策1 のクラス**のままでは `mine` は `int` に化けないので **ⅵ は通らず**、`mine.ticketNumber()` など明示の呼び出しが必要になる。**対策2 のクラス**なら **`int` 引数の所に `mine` をそのまま渡す**経路がコンパイラに認められる。設問の正誤は、その**暗黙経路を型が与えたときにソースから追いにくいこと**である。
+
 ### 各肢の解説
 
 | 選択肢 | 内容 |
