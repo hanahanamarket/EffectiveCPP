@@ -1,29 +1,88 @@
 # 自動的に生成される特殊メンバ関数を理解する
 
 ```mermaid
-%%{init: {'theme':'base','securityLevel':'loose','themeCSS':'svg { background-color: #f4f4f1; } .nodeLabel, .nodeLabel p, .nodeLabel span, .nodeLabel div, .edgeLabel, .edgeLabel span, .edgeLabel p, .edgeLabel tspan, .label { color: #1a1a1a !important; fill: #1a1a1a !important; } .nodeLabel { display: block !important; width: 100% !important; text-align: left !important; } .nodeLabel p, .nodeLabel span, .nodeLabel div { text-align: left !important; } .edgeLabel { background-color: #f4f4f1 !important; } .edgeLabel rect, .labelBkg { fill: #f4f4f1 !important; background-color: #f4f4f1 !important; } .cluster rect { fill: #f4f4f1 !important; } .nodeLabel pre { display: block; width: 100%; margin: 0; text-align: left; background: transparent; border: 0; } .nodeLabel code { color: #1a1a1a !important; background-color: #d2d2d2 !important; display: block; width: 100%; margin: 0; text-align: left; white-space: pre-wrap; font-family: Consolas, monospace; }','flowchart':{'htmlLabels':true,'wrappingWidth':520,'padding':12,'nodeSpacing':32,'rankSpacing':40},'themeVariables':{'background':'#f4f4f1','primaryColor':'#fbfbf8','primaryTextColor':'#1a1a1a','primaryBorderColor':'#1a1a1a','lineColor':'#1a1a1a','secondaryColor':'#fbfbf8','tertiaryColor':'#fbfbf8','textColor':'#1a1a1a','mainBkg':'#fbfbf8','nodeBorder':'#1a1a1a','edgeLabelBackground':'#f4f4f1','nodeTextColor':'#1a1a1a','clusterBkg':'#f4f4f1','clusterBorder':'#1a1a1a','titleColor':'#1a1a1a','fontSize':'16px'}}}%%
+%%{init: {'theme':'base','securityLevel':'loose','htmlLabels':true,'themeCSS':'strong, b, tspan[font-weight=bold] { color: #ff7070 !important; fill: #ff7070 !important; } svg, foreignObject, foreignObject div, .nodeLabel { color-scheme: light dark; } svg { background-color: transparent; } .nodeLabel { display: block !important; } .node rect, .node polygon, .node circle, .classGroup rect, rect.actor { fill: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .nodeLabel, .nodeLabel p, .nodeLabel span, .nodeLabel div, .label, .edgeLabel, .edgeLabel span, .edgeLabel p, .edgeLabel tspan, .edgeLabel text, .cluster-label, .cluster-label span, .cluster-label div, foreignObject, foreignObject div, foreignObject p, foreignObject span, .classGroup text, .classTitleText, .classText, .stereotypeText, text.actor, .messageText, .labelText, .loopText, .noteText, tspan { color: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; } .edgeLabel { background-color: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .edgeLabel rect, .labelBkg { fill: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .cluster rect { fill: transparent !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .edgePath .path, .flowchart-link, .relationshipLine, path.relation, .messageLine0, .messageLine1, .actor-line, .classGroup line { stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; fill: none !important; } .arrowheadPath, marker path, marker polygon { fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; } .nodeLabel pre { display: block; margin: 0; text-align: left; background: transparent; border: 0; } .nodeLabel code { color: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; background-color: var(--vscode-textCodeBlock-background, light-dark(#e0ded8, #3d3d38)) !important; display: block; margin: 0; text-align: left; white-space: pre-wrap; font-family: Consolas, monospace; } .note { fill: var(--vscode-editorWidget-background, light-dark(#f3efe6, #34342f)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; }','flowchart':{'htmlLabels':true,'wrappingWidth':900,'padding':12,'nodeSpacing':32,'rankSpacing':40},'themeVariables':{'background':'transparent','primaryColor':'#fbfbf8','primaryTextColor':'#1a1a1a','primaryBorderColor':'#1a1a1a','lineColor':'#1a1a1a','secondaryColor':'#f4f4f1','tertiaryColor':'#f4f4f1','textColor':'#1a1a1a','mainBkg':'#fbfbf8','nodeBorder':'#1a1a1a','edgeLabelBackground':'#f4f4f1','nodeTextColor':'#1a1a1a','clusterBkg':'transparent','clusterBorder':'#1a1a1a','titleColor':'#1a1a1a','fontSize':'16px','actorBkg':'#fbfbf8','actorBorder':'#1a1a1a','actorTextColor':'#1a1a1a','actorLineColor':'#1a1a1a','signalColor':'#1a1a1a','signalTextColor':'#1a1a1a'}}}%%
 flowchart TD
-    classDef default fill:#fbfbf8,stroke:#1a1a1a,stroke-width:1.5px,color:#1a1a1a
-    classDef stop fill:#f3efe6,stroke:#1a1a1a,stroke-width:1.5px,color:#1a1a1a
-    classDef claim fill:#e7efe4,stroke:#1a1a1a,stroke-width:1.5px,color:#1a1a1a
-    linkStyle default stroke:#1a1a1a,color:#1a1a1a
     subgraph canvas ["生成規則"]
         direction TB
+        SpecialMemberFunc["特殊関数とは<br/>C++自ら生成するメンバ関数を意味する"]
+        SpecialMemberFunc98["<div style='text-align:center !important'>C++98</div><div style='text-align:left !important;white-space:pre'>Widget();    // デフォルトコンストラクタ<br/>~Widget();    // デストラクタ<br/>Widget(const Widget&amp; rhs);    // コピーコンストラクタ<br/>Widget&amp; operator=(const Widget&amp; rhs);    // コピー代入演算子<br/>Widget(Widget&amp;&amp; rhs);</div>"]
+        SpecialMemberFunc11["<div style='text-align:center !important'>C++11</div><div style='text-align:left !important;white-space:pre'>Widget();    // デフォルトコンストラクタ<br/>~Widget();    // デストラクタ<br/>Widget(const Widget&amp; rhs);    // コピーコンストラクタ<br/>Widget&amp; operator=(const Widget&amp; rhs);    // コピー代入演算子<br/>Widget(Widget&amp;&amp; rhs);    // ムーブコンストラクタ<br/>Widget&amp; operator=(Widget&amp;&amp; rhs);    // ムーブ代入演算子</div>"]
+        MoveByMember["ムーブコンストラクタとムーブ代入の挙動"]
+        IndependencyOfCopy["コピーコンストラクタとコピー代入の独立性"]
+        IndependencyOfMove["ムーブコンストラクタとムーブ代入の独立性"]
 
-        open["疑問<br/>どの宣言で特殊メンバ関数が生成され、<br/>どの宣言で生成されないか"]
-        funcs["対象になる関数<br/>C++98 は、デフォルトコンストラクタ、デストラクタ、<br/>コピーコンストラクタ、コピー代入演算子。<br/>C++11 で、ムーブコンストラクタと<br/>ムーブ代入演算子が増える。<br/>生成される関数は public かつ inline。<br/>デストラクタが virtual になるのは、<br/>基底のデストラクタが virtual のときだけ。<br/>生成されたデストラクタは noexcept。"]
-        rules["生成の条件<br/>デフォルトコンストラクタは、<br/>ユーザー宣言のコンストラクタが無いときだけ。<br/>二つのコピー操作は独立している。<br/>片方を宣言しても、もう片方は生成される。<br/>二つのムーブ操作は独立ではない。<br/>片方を宣言すると、もう片方は生成されない。<br/>コピー操作を宣言すると、ムーブ操作は生成されない。<br/>右辺値の初期化や代入は、残ったコピーになる。<br/>ムーブ操作を宣言すると、コピー操作は delete になる。<br/>ムーブ代入を書かなければ、代入はできない。<br/>デストラクタを宣言すると、ムーブ操作は生成されない。<br/>コピーの暗黙生成は残るが、非推奨である。<br/>もう一方のコピーを宣言したときも、非推奨である。<br/>生成されたムーブは、できる部分をムーブし、<br/>できない部分をコピーする。"]
-        stopDtor["停止<br/>デストラクタだけを宣言すると、<br/>ムーブ操作は生成されない。<br/>ログのためだけのデストラクタでも同じ。<pre><code>~StringTable() {<br/>  makeLogEntry();<br/>}</code></pre>ムーブの要求はコピーになる。"]
-        practice["デフォルトで正しい操作は = default で残す<pre><code>class Base {<br/>  public:<br/>    virtual ~Base() = default;<br/>    Base(Base&amp;&amp;) = default;<br/>    Base&amp; operator=(Base&amp;&amp;) = default;<br/>    Base(const Base&amp;) = default;<br/>    Base&amp; operator=(const Base&amp;) = default;<br/>};</code></pre>仮想デストラクタもユーザー宣言なので、<br/>四つとも書かないとムーブは生成されない。<br/>デフォルトの動作が正しくない操作は、<br/>= default しない。"]
-        tpl["コピーに見えるテンプレートは、コピー操作ではない<pre><code>template&lt;typename T&gt;<br/>Widget(const T&amp; rhs);<br/>template&lt;typename T&gt;<br/>Widget&amp; operator=(const T&amp; rhs);</code></pre>T が Widget でも、<br/>コピーコンストラクタでもコピー代入でもない。<br/>コピーを宣言していなければ、コピーは生成される。<br/>メンバ関数テンプレートは、<br/>特殊メンバ関数の生成を抑制しない。"]
-        conclusion["結論<br/>1. 特殊メンバ関数は、コンパイラが生成し得る関数。<br/>デフォルトコンストラクタ、デストラクタ、<br/>コピー操作、ムーブ操作。<br/>2. ムーブ操作が生成されるのは、<br/>ムーブ、コピー、デストラクタを<br/>どれも宣言していないクラスだけ。<br/>3. コピー操作は、その操作を<br/>宣言していないクラスだけで生成される。<br/>ムーブ操作があれば delete になる。<br/>デストラクタ、またはもう一方のコピーがあると、<br/>暗黙生成は非推奨である。<br/>4. メンバ関数テンプレートは、<br/>特殊メンバ関数の生成を抑制しない。"]
-
-        open --> funcs --> rules
-        rules -->|"デストラクタだけ"| stopDtor
-        rules -->|"デフォルトを残す"| practice
-        practice --> tpl --> conclusion
+        SpecialMemberFunc --> SpecialMemberFunc98 --> MoveByMember --> IndependencyOfMove
+        SpecialMemberFunc --> SpecialMemberFunc11 --> MoveByMember
     end
-    style canvas fill:#f4f4f1,stroke:#1a1a1a,color:#1a1a1a
-    class stopDtor stop
-    class conclusion claim
+```
+
+### クラス図は、ムーブの対象になる部分を並べたものです。
+```mermaid
+%%{init: {'theme':'base','securityLevel':'loose','htmlLabels':false,'themeCSS':'strong, b, tspan[font-weight=bold] { color: #ff7070 !important; fill: #ff7070 !important; } svg, foreignObject, foreignObject div, .nodeLabel { color-scheme: light dark; } svg { background-color: transparent; } .node rect, .node polygon, .node circle, .classGroup rect, rect.actor { fill: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .nodeLabel, .nodeLabel p, .nodeLabel span, .nodeLabel div, .label, .edgeLabel, .edgeLabel span, .edgeLabel p, .edgeLabel tspan, .edgeLabel text, .cluster-label, .cluster-label span, .cluster-label div, foreignObject, foreignObject div, foreignObject p, foreignObject span, .classGroup text, .classTitleText, .classText, .stereotypeText, text.actor, .messageText, .labelText, .loopText, .noteText, tspan { color: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; } .edgeLabel { background-color: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .edgeLabel rect, .labelBkg { fill: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .cluster rect { fill: transparent !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .edgePath .path, .flowchart-link, .relationshipLine, path.relation, .messageLine0, .messageLine1, .actor-line, .classGroup line { stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; fill: none !important; } .arrowheadPath, marker path, marker polygon { fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; } .note { fill: var(--vscode-editorWidget-background, light-dark(#f3efe6, #34342f)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; } g.edgeLabel foreignObject div, g.edgeLabel span.edgeLabel, span.edgeLabel, div.labelBkg { background-color: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; color: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; opacity: 1 !important; } g.edgeLabel rect, rect.background { fill: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; opacity: 1 !important; } g.edgeLabel text, g.edgeLabel tspan, .edgeLabel tspan { fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; stroke: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; stroke-width: 4px !important; paint-order: stroke fill !important; } path.outer-path, path.label-container, path.basic, .outer-path path, .label-container path, g.basic path, .node .outer-path path { fill: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; } .divider path, .neo-line path { fill: none !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .annotation-group span, .label-group span, .members-group span, .methods-group span, .annotation-group div, .label-group div, .members-group div, .methods-group div { color: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; opacity: 1 !important; } #compositionStart path, #compositionEnd path, #extensionStart path, #extensionEnd path, #aggregationStart path, #aggregationEnd path, #dependencyStart path, #dependencyEnd path { fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; } svg g.methods-group.text g.label foreignObject div span.nodeLabel.markdown-node-label p strong, svg g.methods-group.text g.label foreignObject div span.nodeLabel.markdown-node-label strong, svg g.methods-group.text g.label foreignObject div span.nodeLabel.markdown-node-label p b, svg g.methods-group.text g.label text tspan.text-inner-tspan[font-weight=bold] { color: #ff7070 !important; fill: #ff7070 !important; }','themeVariables':{'background':'transparent','primaryColor':'#fbfbf8','primaryTextColor':'#1a1a1a','primaryBorderColor':'#1a1a1a','lineColor':'#1a1a1a','textColor':'#1a1a1a','mainBkg':'#fbfbf8','nodeBorder':'#1a1a1a','edgeLabelBackground':'#f4f4f1','nodeTextColor':'#1a1a1a','titleColor':'#1a1a1a','fontSize':'16px'}}}%%
+classDiagram
+    class Base {
+        <<ムーブあり>>
+        +Base(Base&& rhs)
+        +operator=(Base&& rhs) Base&
+    }
+    class String {
+        <<ムーブあり>>
+        +String(**String&& rhs**)
+        +operator=(**String&& rhs**) String&
+    }
+    class Legacy {
+        <<コピーのみ>>
+        +Legacy(**const Legacy& rhs**)
+        +operator=(**const Legacy& rhs**) __Legacy&__
+    }
+    class Widget {
+        +Widget(Widget&& rhs)
+        +operator=(Widget&& rhs) Widget&
+        -String name
+        -Legacy tag
+    }
+    Base <|-- Widget : 基底部分
+    Widget *-- String : name
+    Widget *-- Legacy : tag
+```
+
+### シーケンス図は、Widget dst(std::move(src)) でその部分を宣言順に初期化する流れです。
+```mermaid
+%%{init: {'theme':'base','securityLevel':'loose','htmlLabels':false,'themeCSS':'strong, b, tspan[font-weight=bold] { color: #ff7070 !important; fill: #ff7070 !important; } svg, foreignObject, foreignObject div, .nodeLabel { color-scheme: light dark; } svg { background-color: transparent; } .node rect, .node polygon, .node circle, .classGroup rect, rect.actor { fill: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .nodeLabel, .nodeLabel p, .nodeLabel span, .nodeLabel div, .label, .edgeLabel, .edgeLabel span, .edgeLabel p, .edgeLabel tspan, .edgeLabel text, .cluster-label, .cluster-label span, .cluster-label div, foreignObject, foreignObject div, foreignObject p, foreignObject span, .classGroup text, .classTitleText, .classText, .stereotypeText, text.actor, .messageText, .labelText, .loopText, .noteText, tspan { color: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; } .edgeLabel { background-color: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .edgeLabel rect, .labelBkg { fill: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .cluster rect { fill: transparent !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .edgePath .path, .flowchart-link, .relationshipLine, path.relation, .messageLine0, .messageLine1, .actor-line, .classGroup line { stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; fill: none !important; } .arrowheadPath, marker path, marker polygon { fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; } .note { fill: var(--vscode-editorWidget-background, light-dark(#f3efe6, #34342f)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; }','themeVariables':{'background':'transparent','primaryColor':'#fbfbf8','primaryTextColor':'#1a1a1a','primaryBorderColor':'#1a1a1a','lineColor':'#1a1a1a','textColor':'#1a1a1a','mainBkg':'#fbfbf8','actorBkg':'#fbfbf8','actorBorder':'#1a1a1a','actorTextColor':'#1a1a1a','actorLineColor':'#1a1a1a','signalColor':'#1a1a1a','signalTextColor':'#1a1a1a','noteBkgColor':'#f3efe6','noteTextColor':'#1a1a1a','noteBorderColor':'#1a1a1a','fontSize':'16px'}}}%%
+sequenceDiagram
+    participant C as 呼出し
+    participant W as Widget(Widget&&)
+    participant B as Base
+    participant N as name
+    participant T as tag
+
+    C->>W: dst(std::move(src))
+    W->>B: Base(std::move(src))
+    B-->>W: ムーブコンストラクタ
+    W->>N: name(std::move(src.name))
+    N-->>W: ムーブコンストラクタ
+    W->>T: tag(std::move(src.tag))
+    T-->>W: コピーコンストラクタ
+```
+
+### ムーブ代入 dst = std::move(src) も同じ順です。呼ばれるのは各部分の代入演算子です。
+```mermaid
+%%{init: {'theme':'base','securityLevel':'loose','htmlLabels':false,'themeCSS':'strong, b, tspan[font-weight=bold] { color: #ff7070 !important; fill: #ff7070 !important; } svg, foreignObject, foreignObject div, .nodeLabel { color-scheme: light dark; } svg { background-color: transparent; } .node rect, .node polygon, .node circle, .classGroup rect, rect.actor { fill: var(--vscode-editorWidget-background, light-dark(#fbfbf8, #2a2a27)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .nodeLabel, .nodeLabel p, .nodeLabel span, .nodeLabel div, .label, .edgeLabel, .edgeLabel span, .edgeLabel p, .edgeLabel tspan, .edgeLabel text, .cluster-label, .cluster-label span, .cluster-label div, foreignObject, foreignObject div, foreignObject p, foreignObject span, .classGroup text, .classTitleText, .classText, .stereotypeText, text.actor, .messageText, .labelText, .loopText, .noteText, tspan { color: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #f3f1ea)) !important; } .edgeLabel { background-color: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .edgeLabel rect, .labelBkg { fill: var(--vscode-editor-background, light-dark(#f4f4f1, #1c1c1a)) !important; } .cluster rect { fill: transparent !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke-width: 1.5px !important; } .edgePath .path, .flowchart-link, .relationshipLine, path.relation, .messageLine0, .messageLine1, .actor-line, .classGroup line { stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; fill: none !important; } .arrowheadPath, marker path, marker polygon { fill: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; } .note { fill: var(--vscode-editorWidget-background, light-dark(#f3efe6, #34342f)) !important; stroke: var(--vscode-editor-foreground, light-dark(#1a1a1a, #e4e0d6)) !important; }','themeVariables':{'background':'transparent','primaryColor':'#fbfbf8','primaryTextColor':'#1a1a1a','primaryBorderColor':'#1a1a1a','lineColor':'#1a1a1a','textColor':'#1a1a1a','mainBkg':'#fbfbf8','actorBkg':'#fbfbf8','actorBorder':'#1a1a1a','actorTextColor':'#1a1a1a','actorLineColor':'#1a1a1a','signalColor':'#1a1a1a','signalTextColor':'#1a1a1a','noteBkgColor':'#f3efe6','noteTextColor':'#1a1a1a','noteBorderColor':'#1a1a1a','fontSize':'16px'}}}%%
+sequenceDiagram
+    participant C as 呼出し
+    participant W as operator=(Widget&&)
+    participant B as Base
+    participant N as name
+    participant T as tag
+
+    C->>W: dst = std::move(src)
+    W->>B: Base::operator=(std::move(src))
+    B-->>W: ムーブ代入
+    W->>N: name = std::move(src.name)
+    N-->>W: ムーブ代入
+    W->>T: tag = std::move(src.tag)
+    T-->>W: コピー代入
+    W-->>C: Widget&
+
 ```
