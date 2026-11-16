@@ -14,18 +14,19 @@ flowchart TD
         open -.-> Requirements
 
         %% 特殊関数とは
+        open["論理展開"]
         Prerequisite["前提知識"]
-        SpecialMemberFunc["特殊関数とは<br/>C++自ら生成するメンバ関数を意味する"]
+        SpecialMemberFunc["1.特殊関数とは<br/>C++自ら生成するメンバ関数を意味する"]
         SpecialMemberFunc98["<div style='text-align:center !important'>C++98</div><div style='text-align:left !important;white-space:pre'>Widget();    // デフォルトコンストラクタ<br/>~Widget();    // デストラクタ<br/>Widget(const Widget&amp; rhs);    // コピーコンストラクタ<br/>Widget&amp; operator=(const Widget&amp; rhs);    // コピー代入演算子<br/><br/><br/>"]
         SpecialMemberFunc11["<div style='text-align:center !important'>C++11</div><div style='text-align:left !important;white-space:pre'>Widget();    // デフォルトコンストラクタ<br/>~Widget();    // デストラクタ<br/>Widget(const Widget&amp; rhs);    // コピーコンストラクタ<br/>Widget&amp; operator=(const Widget&amp; rhs);    // コピー代入演算子<br/><span style='color:#ff7070 !important'>Widget(Widget&amp;&amp; rhs);    // ムーブコンストラクタ<br/>Widget&amp; operator=(Widget&amp;&amp; rhs);    // ムーブ代入演算子</span></div>"]
         MoveByMember["ムーブコンストラクタとムーブ代入の挙動"]
 
 
         %% 特殊関数の生成ルールと成立背景
-        RuleOfThree[三関数同時ルール</br>以下のいづれか1つでも宣言する場合は、<br/>この３つを全てしなさいというもの</br>・コピーコンストラクタ</br>・コピー代入演算子</br>・デストラクタ]
+        RuleOfThree[2.三関数同時ルール</br>以下のいづれか1つでも宣言する場合は、<br/>この３つを全てしなさいというもの</br>・コピーコンストラクタ</br>・コピー代入演算子</br>・デストラクタ]
         RuleOfMoveCpp11["C++11のコンパイラのルール<br/>ムーブ演算を生成しない"]
         MoveConstructorCondition["ムーブ演算の自動生成条件<br/>・クラスがコピー演算を宣言していない。<br/>・クラスがムーブ演算を宣言していない。<br/>・クラスがデストラクタを宣言していない。"]
-        EqualDefault[" =defaultの付与<br/>コンパイラで自動生成されるムーブ演算やコピー演算と<br/>同様のものを明示的に宣言するときに=defaultを付ける"]
+        EqualDefault["3.=defaultの付与<br/>コンパイラで自動生成されるムーブ演算やコピー演算と<br/>同様のものを明示的に宣言するときに=defaultを付ける"]
         GoodExampleDefault["=defaultと定義する方式"]
 
 
@@ -42,7 +43,8 @@ flowchart TD
         %% メンバ単位のムーブと、通常のコピー演算
         MemberwiseAsCopy["メンバ単位のムーブ<br/>ムーブ非対応な型はコピー演算により「ムーブ」"]
         CopyInappropriate["通常のコピー演算ではそのクラスにふさわしくないことを示唆する"]
-
+        Copiable["コピー可能にしたい"]
+        DeactivateCopy["クラス内でムーブ演算を宣言すればコピー演算を無効にする"]
 
         %% 特殊関数とは のつながり
         SpecialMemberFunc --> SpecialMemberFunc98 --> MoveByMember
@@ -52,16 +54,19 @@ flowchart TD
 
         %% 特殊関数の生成ルールと成立背景 のつながり
         CopyInappropriate -- "C++98" --> RuleIgnored["重要視されず"]
-        CopyInappropriate -- "C++11" --> RuleEnforced["重要視される"] --> RuleOfMoveCpp11 --> MoveConstructorCondition
-        RuleOfThree --> MoveConstructorCondition
+        CopyInappropriate -- "C++11" --> RuleEnforced["重要視される"] --> RuleOfMoveCpp11
+        RuleOfMoveCpp11 -- "背景の設計思想" --> MoveConstructorCondition
+        RuleOfThree -- "背景の設計思想" --> MoveConstructorCondition
 
         %% 実装したい要件 のつながり
         Requirements -.-> Polymorphism -. "スライス問題を避けるため" .-> VirtualDestructor
         MoveConstructorCondition -. "ムーブ演算の生成が抑制" .-> ExplicitVirtualDestructor -.-> GoodExampleDefault
         VirtualDestructor -.-> MoveConstructorCondition
         Requirements -.-> WantMove -. "ムーブ演算の生成が抑制" .-> NeedMoveDeclare
-        NeedMoveDeclare -. "クラス内でムーブ演算を宣言すればコピー演算を無効にする" .-> AddDefaultToCopy
+        Copiable -.-> DeactivateCopy
+        NeedMoveDeclare -.-> DeactivateCopy .-> AddDefaultToCopy
         EqualDefault -.-> AddDefaultToCopy -.-> GoodExampleDefault
+        Requirements -.-> Copiable
     end
 ```
 
