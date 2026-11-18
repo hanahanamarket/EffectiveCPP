@@ -29,7 +29,7 @@ public:
     explicit Widget(std::string n)  // 特殊メンバではない
         : name(std::move(n)) {}
 
-    Widget(const Widget& rhs)  // コピーコンストラクタ。コピー代入演算子は定義しない。
+    Widget(const Widget& rhs)  // コピーコンストラクタを宣言。コピー代入演算子は宣言しない。
         : name(rhs.name) {}
 
     const std::string& getName() const {
@@ -77,7 +77,7 @@ class Widget {
 public:
     Widget() {}
 
-    Widget(Widget&& rhs)  // ムーブコンストラクタ。ムーブ代入演算子は定義しない。
+    Widget(Widget&& rhs)  // ムーブコンストラクタを宣言。ムーブ代入演算子は宣言しない。
         : name(std::move(rhs.name)) {}
 
 private:
