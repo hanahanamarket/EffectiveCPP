@@ -17,26 +17,37 @@ C++11 のクラスには、条件を満たすとコンパイラが用意する�
 
 ## (1)
 
-`Widget` がユーザ宣言している特殊メンバ関数は、次のコピーコンストラクタだけである。その定義は `name` をコピーする。
+`Widget` がユーザ宣言している特殊メンバ関数は、次のコピーコンストラクタだけである。`Widget(std::string)` は特殊メンバではない。
 
 ```cpp
+#include <iostream>
+#include <string>
+#include <utility>
+
 class Widget {
 public:
-    Widget(const Widget& rhs);
+    explicit Widget(std::string n)  //こちらは特殊メンバではない
+        : name(std::move(n)) {}
+
+    Widget(const Widget& rhs)  //コピーコンストラクタ
+        : name(rhs.name) {}
+
+    const std::string& getName() const {
+        return name;
+    }
+
 private:
     std::string name;
 };
-```
 
-この問では次を仮定する。
+int main()
+{
+    Widget a("widget");
+    Widget b(std::move(a));  // ムーブコンストラクタがないためコピー
 
-- 判定するのは下の初期化だけである。`a` は構築済みで、`a.name` は `"widget"` である
-- ムーブコンストラクタが候補に無いとき、この右辺値は `const Widget&` に束縛でき、上のコピーコンストラクタを呼べる
-- ムーブコンストラクタと上のコピーコンストラクタの両方が候補のとき、この右辺値にはムーブコンストラクタの方が適合が良い
-- ムーブコンストラクタが呼ばれた場合、その定義は `name` をムーブする
-
-```cpp
-Widget b(std::move(a));
+    std::cout << a.getName() << '\n';
+    std::cout << b.getName() << '\n';
+}
 ```
 
 この初期化の結果として最も適切なものはどれか。
