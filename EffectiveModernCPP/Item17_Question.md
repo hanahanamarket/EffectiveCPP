@@ -26,10 +26,10 @@ C++11 のクラスには、条件を満たすとコンパイラが用意する�
 
 class Widget {
 public:
-    explicit Widget(std::string n)  //こちらは特殊メンバではない
+    explicit Widget(std::string n)  // 特殊メンバではない
         : name(std::move(n)) {}
 
-    Widget(const Widget& rhs)  //コピーコンストラクタ
+    Widget(const Widget& rhs)  // コピーコンストラクタ。コピー代入演算子は定義しない。
         : name(rhs.name) {}
 
     const std::string& getName() const {
@@ -43,89 +43,56 @@ private:
 int main()
 {
     Widget a("widget");
-    Widget b(std::move(a));  // ムーブコンストラクタがないためコピー
+    Widget b(std::move(a));  // 右辺値からの初期化
+    Widget c("other");
+    c = std::move(a);        // 右辺値からの代入
 
     std::cout << a.getName() << '\n';
     std::cout << b.getName() << '\n';
+    std::cout << c.getName() << '\n';
 }
 ```
 
-この初期化の結果として最も適切なものはどれか。
+この `main` の結果として最も適切なものはどれか。
 
-A. 適格である。生成されたムーブコンストラクタが呼ばれ、`a.name` は空、`b.name` は `"widget"` になる
+A. 適格である。`b` の初期化も `c` への代入もムーブされ、`a.name` は空、`b.name` と `c.name` は `"widget"` になる
 
-B. 適格である。ユーザ宣言のコピーコンストラクタが呼ばれ、`a.name` も `b.name` も `"widget"` のままである
+B. 適格である。`b` の初期化はコピーコンストラクタ、`c` への代入はコピー代入演算子であり、`a.name` も `b.name` も `c.name` も `"widget"` のままである
 
-C. 不適格である。ムーブコンストラクタが delete として宣言され、その関数がコピーコンストラクタより優先して選ばれる
+C. `b` の初期化は適格でコピーになるが、`c` への代入は不適格である
 
-D. 不適格である。コピーコンストラクタをユーザ宣言したクラスにはデフォルトコンストラクタが無く、引数のあるこの初期化もできない
+D. 不適格である。ムーブコンストラクタとムーブ代入演算子が delete として宣言され、コピーより優先して選ばれる
 
 ---
 
 ## (2)
 
-`Widget` がユーザ宣言している特殊メンバ関数は、次のコピーコンストラクタだけである。`a` と `b` は構築済みである。代入の前、`a.name` は `"src"` であり、`b.name` は `"src"` ではない。
+`Widget` がユーザ宣言している特殊メンバ関数は、デフォルトコンストラクタとムーブコンストラクタだけである。文1と文2の適格性は独立に判定する。
 
 ```cpp
-class Widget {
-public:
-    Widget(const Widget& rhs);
-private:
-    std::string name;
-};
-```
+#include <string>
+#include <utility>
 
-この問では次を仮定する。
-
-- 各文の適格性は独立に判定する
-- 代入がどの代入演算子を呼ぶかは、代入演算子のオーバーロード解決だけで決まる
-- コピー代入演算子が候補にあり、ムーブ代入演算子が候補に無いとき、右辺値はそのコピー代入演算子の `const Widget&` に束縛できる
-- コピー代入演算子とムーブ代入演算子の両方が候補で、実引数が右辺値のときは、ムーブ代入演算子の方が適合が良い
-- 呼び出せるコピー代入演算子は、`name` をコピーする
-- 呼び出せるムーブ代入演算子は、`name` をムーブする
-
-```cpp
-b = a;             // 文1
-b = std::move(a);  // 文2
-```
-
-文1と文2の結果として最も適切なものはどれか。
-
-A. 文1は適格で、`b.name` は `"src"` になる。文2は不適格である
-
-B. 文1は不適格である。文2は適格で、ムーブ代入演算子が呼ばれ、`a.name` は空、`b.name` は `"src"` になる
-
-C. 文1も文2も適格である。どちらもムーブ代入演算子が呼ばれ、`a.name` は空、`b.name` は `"src"` になる
-
-D. 文1も文2も適格である。どちらもコピー代入演算子が呼ばれ、`a.name` は `"src"` のまま、`b.name` は `"src"` になる
-
----
-
-## (3)
-
-`Widget` がユーザ宣言している特殊メンバ関数は、デフォルトコンストラクタとムーブコンストラクタだけである。ムーブコンストラクタの定義は `name` をムーブする。
-
-```cpp
 class Widget {
 public:
     Widget() {}
-    Widget(Widget&& rhs);
+
+    Widget(Widget&& rhs)  // ムーブコンストラクタ。ムーブ代入演算子は定義しない。
+        : name(std::move(rhs.name)) {}
+
 private:
-    std::string name;
+    std::string name;  // コピーもムーブも可能。name を理由に代入演算子は delete されない
 };
 
-Widget a;
-Widget b;
-b = a;             // 文1
-b = std::move(a);  // 文2
+int main()
+{
+    Widget a;
+    Widget b;
+
+    b = a;             // 文1
+    b = std::move(a);  // 文2
+}
 ```
-
-この問では次を仮定する。
-
-- 各文の適格性は独立に判定する
-- 代入がどの代入演算子を呼ぶかは、代入演算子のオーバーロード解決だけで決まる
-- `std::string` のコピーとムーブは可能であり、`name` を理由に代入演算子が delete されることはない
-- コピー代入演算子が delete で、ムーブ代入演算子が候補に無いとき、左辺値の代入も右辺値の代入も、その delete されたコピー代入演算子が候補になる
 
 文1と文2の結果として最も適切なものはどれか。
 
@@ -139,41 +106,54 @@ D. 文1は適格で、コピー代入演算子を呼ぶ。文2は不適格であ
 
 ---
 
-## (4)
+## (3)
 
-追加前の `StringTable` は次のとおりである。この問では、追加前の `StringTable b(std::move(a));` がムーブコンストラクタを呼び、`values` をムーブすることを前提とする。
+追加前の `StringTable` は次のとおりである。追加前の `StringTable b(std::move(a));` はムーブコンストラクタを呼び、`values` をムーブする。
 
 ```cpp
+#include <map>
+#include <string>
+#include <utility>
+
 class StringTable {
 public:
-    StringTable();
+    StringTable() {}
 private:
-    std::map<int, std::string> values;
+    std::map<int, std::string> values;  // コピーもムーブも可能。delete されていない
 };
+
+int main()
+{
+    StringTable a;
+    StringTable b(std::move(a));  // 追加前: ムーブコンストラクタ
+}
 ```
 
-追加後は、ログ用のデストラクタだけをユーザ宣言する。このデストラクタの定義はログを1行出すだけで、`values` を変更しない。`std::map<int, std::string>` のコピーコンストラクタとムーブコンストラクタは存在し、delete されていない。
+追加後は、ログ用のデストラクタだけをユーザ宣言する。判定するのは、追加後のクラスによる初期化だけである。
 
 ```cpp
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility>
+
 class StringTable {
 public:
-    StringTable();
-    ~StringTable();
+    StringTable() {}
+
+    ~StringTable() {  // ログ用。values は変更しない
+        std::cout << "destroyed\n";
+    }
+
 private:
-    std::map<int, std::string> values;
+    std::map<int, std::string> values;  // コピーもムーブも可能。delete されていない
 };
-```
 
-この問では次を仮定する。
-
-- 判定するのは、追加後のクラスによる次の初期化だけである。`a` は構築済みである
-- ムーブコンストラクタが候補に無いとき、この右辺値はコピーコンストラクタの `const StringTable&` に束縛できる
-- ムーブコンストラクタとコピーコンストラクタの両方が候補のとき、この右辺値にはムーブコンストラクタの方が適合が良い
-- コピーコンストラクタが呼ばれたとき、`values` はコピーされる
-- ムーブコンストラクタが呼ばれたとき、`values` はムーブされる
-
-```cpp
-StringTable b(std::move(a));
+int main()
+{
+    StringTable a;
+    StringTable b(std::move(a));  // 追加後: 判定対象
+}
 ```
 
 追加後のこの初期化として最も適切なものはどれか。
@@ -188,7 +168,7 @@ D. ムーブコンストラクタが呼ばれ、`values` はムーブされる�
 
 ---
 
-## (5)
+## (4)
 
 `Base` のデストラクタは virtual でなければならない。`name` のコピーとムーブは、どちらも可能である。
 
